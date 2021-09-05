@@ -1,15 +1,17 @@
 import { Controller, Get, Query, Param, Post, Body, Put, Delete,HttpStatus, HttpCode, Res, Logger } from '@nestjs/common';
 import { ParseIntPipe } from '../../common/parse-int.pipe';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
 import { ProductsService } from '../services/products.service';
 import { CreateProductDto, UpdateProductDto } from '../dtos/products.dto';
 
+@ApiTags('products')//ASI LAS SEGMENTAMOS EN SWAGGER
 @Controller('products')
 export class ProductsController {
 
   constructor(private productsService: ProductsService){}//INYECCION DE DEPENDENCIAS DEL SERVICIO DE PRODUCTS
 
-
+  @ApiOperation({summary: 'List of products'})
   @Get(':id') //RECIBIENDO PARAMETRO
   getProduct(@Param('id', ParseIntPipe) id: number) {//PIPE PARA TRANSFORMAR Y VALIDAR QUE ES UN INT
     const productos = this.productsService.findOne(+id);
