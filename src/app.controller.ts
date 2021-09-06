@@ -6,15 +6,13 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string { //ENDPOINT
+  getHello(): string {
+    //ENDPOINT
     return this.appService.getHello();
   }
 
-  @Get("nuevo") //ENDPOINT
-  newEndpoint(){
-    return "Yo soy nuevo";
+  @Get('nuevo') //ENDPOINT
+  newEndpoint() {
+    return 'Yo soy nuevo';
   }
-
-  
-
 }

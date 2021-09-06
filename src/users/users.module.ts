@@ -4,10 +4,9 @@ import { UsersController } from './controllers/users.controller';
 
 import { ProductsModule } from 'src/products/products.module'; //ME TRAIGO EL PRODUCTSMODULE
 
-
 @Module({
   imports: [ProductsModule], //ACÁ IMPORTO PRODUCTSMODULE
-  providers: [ UsersService],
+  providers: [UsersService],
   controllers: [UsersController],
 })
 export class UsersModule {}
