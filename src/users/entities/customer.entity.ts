@@ -1,9 +1,9 @@
-import { Entity, Column, PrimaryColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
 export class Customer {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar', length: 255 })
