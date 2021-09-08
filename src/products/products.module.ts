@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { CategoriesController } from './controllers/categories.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ProductsController } from './controllers/products.controller'; //IMPORTO CONTROLADOR
+import { ProductsController } from './controllers/products.controller';
+import { ProductsService } from './services/products.service';
+import { Product } from './entities/product.entity';
+import { CategoriesController } from './controllers/categories.controller';
 import { CategoriesService } from './services/categories.service';
-import { ProductsService } from './services/products.service'; //IMPORTO SERVICIO
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Product])],
   controllers: [ProductsController, CategoriesController],
   providers: [ProductsService, CategoriesService],
-  exports: [ProductsService], //ME AYUDA A EXPORTAR PARA SER UTILIZADOS EN OTROS MODULOS
+  exports: [ProductsService],
 })
 export class ProductsModule {}

@@ -1,72 +1,62 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Client } from 'pg';
 
-import { User } from '../entities/user.entity'; //IMPORTO LA ENTIDAD PRODUCT
-import { Order } from '../entities/order.entity'; //IMPORTO LA ENTIDAD ORDER
-
+import { User } from '../entities/user.entity';
+import { Order } from '../entities/order.entity';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
 
-import { ProductsService } from 'src/products/services/products.service';
+import { ProductsService } from './../../products/services/products.service';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private productsService: ProductsService, //INYECCION DE PRODUCTSSERVICE
-    private configService: ConfigService, //INYECCION DE API_KEY
+    private productsService: ProductsService,
+    private configService: ConfigService,
+    @Inject('PG') private clientPg: Client,
   ) {}
 
-  private counterId = 1; //CONTADOR ID
-  private users: User[] /*LO PONGO DE CLASE PRODUCT*/ = [
+  private counterId = 1;
+  private users: User[] = [
     {
       id: 1,
-      name: 'Heisenberg',
-      lastname: 'as',
-      address: 'Los Pollos Hermanos',
-      phone: '444',
-      documentId: 1212,
+      email: 'correo@mail.com',
+      password: '12345',
+      role: 'admin',
     },
-  ]; //ME TRAIGO LAS CARACTERISTICAS QUE TIENE LA ENTIDAD
+  ];
 
-  findAll(): User[] {
-    //ME RETORNA TODOS LOS PRODUCTOS
-    Logger.log(JSON.stringify(this.users), 'findAll');
-    if (this.users === null) {
-      throw new NotFoundException(`Users not found`); //MANEJO DE ERRORES
-    }
+  findAll() {
+    const apiKey = this.configService.get('API_KEY');
+    const dbName = this.configService.get('DATABASE_NAME');
+    console.log(apiKey, dbName);
     return this.users;
   }
 
   findOne(id: number) {
-    //BUSCA UN PRODUCTO EN ESPECIFICO
-    const user = this.users.find((item) => item.id === id); //UTILIZO FIND() y realizo la verificación
+    const user = this.users.find((item) => item.id === id);
     if (!user) {
-      throw new NotFoundException(`User #${id} not found`); //MANEJO DE ERRORES
+      throw new NotFoundException(`User #${id} not found`);
     }
     return user;
   }
 
-  create(payload: CreateUserDto) {
-    //METODO PARA CREAR PRODUCTO - ASI ENVIARÁ LO QUE NOSOTROS ESPERAMOS SEGÚN EL DTOS
-    this.counterId = this.counterId + 1; //SE LE SUMA AL CONTADOR
+  create(data: CreateUserDto) {
+    this.counterId = this.counterId + 1;
     const newUser = {
       id: this.counterId,
-      ...payload,
+      ...data,
     };
-    this.users.push(newUser); //SE INSERTA DENTRO DEL ARRAY DE PRODUCTOS
+    this.users.push(newUser);
     return newUser;
   }
 
-  update(id: number, payload: UpdateUserDto) {
-    //AYUDA A NO COMETER ERRORES DE TIPADO
-    const userFind = this.findOne(id);
-    Logger.log('Conseguí a ' + userFind.name);
-    if (!userFind) {
-      throw new NotFoundException(`User #${id} not found`); //MANEJO DE ERRORES
-    }
+  update(id: number, changes: UpdateUserDto) {
+    const user = this.findOne(id);
     const index = this.users.findIndex((item) => item.id === id);
     this.users[index] = {
-      ...userFind,
-      ...payload,
+      ...user,
+      ...changes,
     };
     return this.users[index];
   }
@@ -74,18 +64,29 @@ export class UsersService {
   remove(id: number) {
     const index = this.users.findIndex((item) => item.id === id);
     if (index === -1) {
-      throw new NotFoundException(`User #${id} not found`); //MANEJO DE ERRORES
+      throw new NotFoundException(`User #${id} not found`);
     }
     this.users.splice(index, 1);
     return true;
   }
 
-  getOrderByUser(id: number): Order {
+  async getOrderByUser(id: number) {
     const user = this.findOne(id);
     return {
       date: new Date(),
       user,
-      products: this.productsService.findAll(),
+      products: await this.productsService.findAll(),
     };
+  }
+
+  getTasks() {
+    return new Promise((resolve, reject) => {
+      this.clientPg.query('SELECT * FROM tasks', (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(res.rows);
+      });
+    });
   }
 }

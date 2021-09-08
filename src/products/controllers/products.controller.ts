@@ -10,53 +10,59 @@ import {
   HttpStatus,
   HttpCode,
   Res,
-  Logger,
+  // ParseIntPipe,
 } from '@nestjs/common';
-import { ParseIntPipe } from '../../common/parse-int.pipe';
+import { Response } from 'express';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
-import { ProductsService } from '../services/products.service';
+import { ParseIntPipe } from '../../common/parse-int.pipe';
 import { CreateProductDto, UpdateProductDto } from '../dtos/products.dto';
+import { ProductsService } from './../services/products.service';
 
-@ApiTags('products') //ASI LAS SEGMENTAMOS EN SWAGGER
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) {} //INYECCION DE DEPENDENCIAS DEL SERVICIO DE PRODUCTS
-
-  @ApiOperation({ summary: 'List of products' }) //INFORMACIÓN DE LOS ENDPOINTS
-  @Get(':id') //RECIBIENDO PARAMETRO
-  getProduct(@Param('id', ParseIntPipe) id: number) {
-    //PIPE PARA TRANSFORMAR Y VALIDAR QUE ES UN INT
-    const productos = this.productsService.findOne(+id);
-    Logger.log(JSON.stringify(productos)); //USAR PARA REVISAR POR CONSOLA
-    return productos; //ENCUENTRO UNO CON EL METODO EN SERVICE Y LE PASO POR PARAMETRO EL ID NECESARIO
-  }
+  constructor(private productsService: ProductsService) {}
 
   @Get()
-  getProductsAll(
-    @Query('limit') limit: number,
-    @Query('offset') offset: number,
+  @ApiOperation({ summary: 'List of products' })
+  getProducts(
+    @Query('limit') limit = 100,
+    @Query('offset') offset = 0,
+    @Query('brand') brand: string,
   ) {
-    //RETORNARÁ TODOS DESDE EL METODO QUE ESTÁ EN SERVICIO
-    const productos = this.productsService.findAll();
-    Logger.log(JSON.stringify(productos)); //USAR PARA REVISAR POR CONSOLA
-    return productos;
+    // return {
+    //   message: `products limit=> ${limit} offset=> ${offset} brand=> ${brand}`,
+    // };
+    return this.productsService.findAll();
   }
 
-  @Post() //CREAR
+  @Get('filter')
+  getProductFilter() {
+    return `yo soy un filter`;
+  }
+
+  @Get(':productId')
+  @HttpCode(HttpStatus.ACCEPTED)
+  getOne(@Param('productId', ParseIntPipe) productId: number) {
+    // response.status(200).send({
+    //   message: `product ${productId}`,
+    // });
+    return this.productsService.findOne(productId);
+  }
+
+  @Post()
   create(@Body() payload: CreateProductDto) {
-    //ASI ENVIARÁ LO QUE NOSOTROS ESPERAMOS SEGÚN EL DTOS
-    //CON EL PAYLOAD ES CUANDO SE RECIBIRÁ
-    this.productsService.create(payload); //CREACIÓN CON EL METODO QUE ESTÁ EN SERVICIO
+    return this.productsService.create(payload);
   }
 
-  @Put('update/:id') //PARAMETRO DE QUÉ VAMOS A EDITAR //---------------PREGUNTAR
-  update(@Param('id') id: string, @Body() payload: UpdateProductDto) {
-    return this.productsService.update(+id, payload); //UPDATE CON EL METODO QUE SE ENCUENTRA EN SERVICIO
+  @Put(':id')
+  update(@Param('id') id: number, @Body() payload: UpdateProductDto) {
+    return this.productsService.update(id, payload);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  delete(@Param('id') id: number) {
+    return this.productsService.remove(id);
   }
 }

@@ -1,22 +1,10 @@
-import {
-  IsString,
-  IsNumber,
-  IsUrl,
-  IsNotEmpty,
-  IsPositive,
-} from 'class-validator'; //VALIDADORES
+import { IsString, IsNotEmpty } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 
-export class CreateCategotyDto {
-  @IsString() //VALIDADOR
-  @IsNotEmpty()
-  readonly name: string; //CON EL READONLY EL ATRIBUTO SERÁ GUARDADO EXACTAMENTR IGUAL EN LA BDD YA QUE NO PUEDE SER MANIPULADO
-
+export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
-  readonly description: string;
+  readonly name: string;
 }
 
-export class UpdateCategoryDto extends PartialType(CreateCategotyDto) {
-  //EXTIENDE DE CREATEPRODUCT Y SE TRAE LAS VALIDACIONES
-}
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}

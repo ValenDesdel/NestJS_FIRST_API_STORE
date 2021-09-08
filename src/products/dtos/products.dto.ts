@@ -4,33 +4,35 @@ import {
   IsUrl,
   IsNotEmpty,
   IsPositive,
-} from 'class-validator'; //VALIDADORES
-import { PartialType } from '@nestjs/swagger';
+} from 'class-validator';
+import { PartialType, ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
-  @IsString() //VALIDADOR
+  @IsString()
   @IsNotEmpty()
-  readonly name: string; //CON EL READONLY EL ATRIBUTO SERÁ GUARDADO EXACTAMENTR IGUAL EN LA BDD YA QUE NO PUEDE SER MANIPULADO
+  @ApiProperty({ description: `product's name` })
+  readonly name: string;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   readonly description: string;
 
-  @IsPositive()
   @IsNumber()
   @IsNotEmpty()
+  @IsPositive()
+  @ApiProperty()
   readonly price: number;
 
-  @IsPositive()
   @IsNumber()
   @IsNotEmpty()
+  @ApiProperty()
   readonly stock: number;
 
   @IsUrl()
   @IsNotEmpty()
+  @ApiProperty()
   readonly image: string;
 }
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {
-  //EXTIENDE DE CREATEPRODUCT Y SE TRAE LAS VALIDACIONES
-}
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
