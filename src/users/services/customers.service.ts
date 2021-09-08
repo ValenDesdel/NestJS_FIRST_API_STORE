@@ -4,59 +4,48 @@ import { Client } from 'pg';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { User } from '../entities/user.entity';
-import { Order } from '../entities/order.entity';
-import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
+import { Customer } from '../entities/customer.entity';
+import { CreateCustomerDto, UpdateCustomerDto } from '../dtos/customer.dto';
 
-import { ProductsService } from './../../products/services/products.service';
+import { ProductsService } from '../../products/services/products.service';
 
 @Injectable()
-export class UsersService {
+export class CustomersService {
   constructor(
     private productsService: ProductsService,
     private configService: ConfigService,
     @Inject('PG') private clientPg: Client,
-    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Customer) private customerRepo: Repository<Customer>,
   ) {}
-
-  private counterId = 1;
-  private users: User[] = [
-    {
-      id: 1,
-      email: 'correo@mail.com',
-      password: '12345',
-      role: 'admin',
-    },
-  ];
 
   findAll() {
     const apiKey = this.configService.get('API_KEY');
     const dbName = this.configService.get('DATABASE_NAME');
     console.log(apiKey, dbName);
-    return this.userRepo.find();
+    return this.customerRepo.findOne();
   }
 
   async findOne(id: number) {
-    const user = await this.userRepo.findOne(id);
+    const user = await this.customerRepo.findOne(id);
     if (!user) {
       throw new NotFoundException(`User #${id} not found`);
     }
     return user;
   }
 
-  create(data: CreateUserDto) {
-    const newUser = this.userRepo.create(data);
-    return this.userRepo.save(newUser);
+  create(data: CreateCustomerDto) {
+    const newCustomer = this.customerRepo.create(data);
+    return this.customerRepo.save(newCustomer);
   }
 
-  async update(id: number, changes: UpdateUserDto) {
+  async update(id: number, changes: UpdateCustomerDto) {
     const user = await this.findOne(id);
-    this.userRepo.merge(user, changes);
-    return this.userRepo.save(user);
+    this.customerRepo.merge(user, changes);
+    return this.customerRepo.save(user);
   }
 
   remove(id: number) {
-    return this.userRepo.delete(id);
+    return this.customerRepo.delete(id);
   }
 
   async getOrderByUser(id: number) {
